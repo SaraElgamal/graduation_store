@@ -4,13 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:graduation_project/features/home_page/home_page.dart';
 import '../../../../core/constant/components/components.dart';
 import '../../../../core/constant/const/const.dart';
 import '../../../../generated/l10n.dart';
 import '../../../logic/cubit.dart';
 import '../../../logic/states.dart';
 import '../../login/presentation/login.dart';
-import '../../otp/verify.dart';
 
 
 class RegisterScreen extends StatefulWidget {
@@ -20,7 +20,8 @@ class RegisterScreen extends StatefulWidget {
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-var name = TextEditingController();
+var nameF = TextEditingController();
+var nameL = TextEditingController();
 
 var email = TextEditingController();
 
@@ -30,7 +31,7 @@ var formKey = GlobalKey<FormState>();
 
 
 
-
+bool chooseRole = true ;
   var message = TextEditingController();
 
   var passwordRegister = TextEditingController();
@@ -85,7 +86,7 @@ var formKey = GlobalKey<FormState>();
                             height: 40.78.h,
                           ),
 
-                          Text(S.of(context).name,
+                          Text('الاسم الاول',
                             style:  GoogleFonts.tajawal(
                               color: primaryColor,
                               fontWeight: FontWeight.bold,
@@ -96,13 +97,39 @@ var formKey = GlobalKey<FormState>();
                           ),
                           defaultTextFormFeild(
                             context,
-                            controller: name,
+                            controller: nameF,
                             validate: (value) {
                               if (value == null || value == '') {
                                 return S.of(context).validate;
                               }
                             },
-                            label: S.of(context).name_text,
+                            label: 'الاسم الاول',
+                            // hint: 'الاسم الاول',
+                            keyboardType: TextInputType.name,
+                            suffix: Container(),
+                          ),
+                          SizedBox(
+                            height: 10.h,
+                          ),
+                          Text('الاسم الاخير',
+                            style:  GoogleFonts.tajawal(
+                              color: primaryColor,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.sp,
+                            ), ),
+
+                          SizedBox(
+                            height: 10.h,
+                          ),
+                          defaultTextFormFeild(
+                            context,
+                            controller: nameL,
+                            validate: (value) {
+                              if (value == null || value == '') {
+                                return S.of(context).validate;
+                              }
+                            },
+                            label: 'الاسم الاخير',
                             // hint: 'الاسم الاول',
                             keyboardType: TextInputType.name,
                             suffix: Container(),
@@ -116,6 +143,7 @@ var formKey = GlobalKey<FormState>();
                           SizedBox(
                             height: 10.h,
                           ),
+
                           defaultTextFormFeild(
                             context,
                             suffix: Container(),
@@ -132,6 +160,84 @@ var formKey = GlobalKey<FormState>();
                             // hint: 'البريد الالكتروني',
                             keyboardType: TextInputType.emailAddress,
                           ),
+                          SizedBox(
+                            height: 20.h,
+                          ),
+                          Row(
+                            children: [
+
+                              InkWell(
+                                onTap: ()
+                                {
+                                  setState(() {
+
+                                    chooseRole = true ;
+                                  });
+                                },
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Container(
+                                      height: 23.h,
+                                      width: 23.w,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color:  Colors.black,width: 3),
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 20.h,
+                                      width: 20.w,
+                                      decoration:  BoxDecoration(
+                                        color: chooseRole ? Colors.blue : Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: 5.w,),
+                              Text('مستخدم',style : GoogleFonts.cairo(fontSize: 14.sp,fontWeight: FontWeight.w600)),
+                              SizedBox(width: 30.w,),
+
+                              InkWell(
+                                onTap: ()
+                                {
+                                  setState(() {
+                                    chooseRole = false ;
+                                  });
+
+                                },
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Container(
+                                      height: 23.h,
+                                      width: 23.w,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color:  Colors.black,width: 3),
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    Container(
+                                      height: 20.h,
+                                      width: 20.w,
+                                      decoration:  BoxDecoration(
+                                        color: chooseRole ? Colors.white  : Colors.blue,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: 5.w,),
+                              Text('صاحب محل',style : GoogleFonts.cairo(fontSize: 14.sp,fontWeight: FontWeight.w600)),
+
+                            ],
+                          ),
+
                           SizedBox(height: 24.h),
                           Text(S.of(context).mobile_number,style:  GoogleFonts.tajawal(
                             color: primaryColor,
@@ -148,7 +254,7 @@ var formKey = GlobalKey<FormState>();
                               if (value == null || value == '') {
                                 return S.of(context).validate;
                               }
-                              if (value.length < 12 ) {
+                              if (value.length < 11 ) {
                                 return S.of(context).condition_phone;
                               }
                             },
@@ -230,7 +336,11 @@ var formKey = GlobalKey<FormState>();
                           SizedBox(height: 32.h),
     BlocConsumer<AppCubit,AppStates>(
     listener: (context, state) {
+if(state is PostSuccessRegisterState)
+{
+  navigateTo(context, HomePage());
 
+}
     },
     builder: (context, state) {
       if (state is PostLoadingRegisterState) {
@@ -246,13 +356,14 @@ var formKey = GlobalKey<FormState>();
                     .login,
                 toPage: () {
                   if (formKey.currentState!.validate()) {
-                    // AppCubit.get(context).postRegister(
-                    //   name: name.text,
-                    //   email: email.text,
-                    //   phone: phone.text,
-                    //   password: passwordRegister.text,
-                    // );
-                    navigateTo(context, VerificationPhoneAndEmail());
+                    AppCubit.get(context).postRegister(
+                      firstName: nameF.text,
+                      lastName: nameL.text,
+                      email: email.text,
+                      role: chooseRole ? "user" : "Products Owner",
+                      phone: phone.text,
+                      password: passwordRegister.text,
+                    );
                   }
                 }
 

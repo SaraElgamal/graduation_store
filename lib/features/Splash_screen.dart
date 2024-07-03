@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:graduation_project/core/constant/end_points/end_point.dart';
 import 'package:lottie/lottie.dart';
 import '../core/constant/components/components.dart';
 import '../core/constant/const/const.dart';
@@ -22,8 +23,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   @override
   void initState() {
     Future.delayed(const Duration(seconds: 5), () {
-      // Navigate to the home page
-   navigateFinish(context, idUser != null ? const HomePage() :  LoginScreen());
+   navigateFinish(context,
+   const HomePage() );
 
     });
     super.initState();

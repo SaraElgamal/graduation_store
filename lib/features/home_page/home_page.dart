@@ -63,20 +63,21 @@ class HomePage extends StatelessWidget {
             ),
               label: S.of(context).category,
             ),
-            BottomNavigationBarItem(icon: SvgPicture.asset('assets/images/shopping.svg'
+            // BottomNavigationBarItem(icon: SvgPicture.asset('assets/images/shopping.svg'
+            //   ,
+            //   height: 30.0.h,
+            //   width: 30.0.w,
+            //   color: cubit.currentIndex == 2 ? SecondColor : const Color(0xFF9B9B9B),
+            // ),
+            //   label: 'العربة',
+            // ),
+
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset('assets/images/user.svg'
               ,
               height: 30.0.h,
               width: 30.0.w,
               color: cubit.currentIndex == 2 ? SecondColor : const Color(0xFF9B9B9B),
-            ),
-              label: 'العربة',
-            ),
-
-            BottomNavigationBarItem(icon: SvgPicture.asset('assets/images/user.svg'
-              ,
-              height: 30.0.h,
-              width: 30.0.w,
-              color: cubit.currentIndex == 3 ? SecondColor : const Color(0xFF9B9B9B),
             ),
               label: S.of(context).profile,
             ),

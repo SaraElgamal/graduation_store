@@ -1,27 +1,41 @@
 abstract class ProductStates{}
 class InitialStateProduct extends ProductStates{}
 
-class GetLoadingBannersStateProduct extends ProductStates{}
-class GetSuccessBannersStateProduct extends ProductStates{}
-class GetErrorBannersStateProduct extends ProductStates{}
+class PostAddLoadingProduct extends ProductStates{}
+class PostAddSuccessProduct extends ProductStates{}
+class PostAddErrorProduct extends ProductStates{}
 
 
-class GetLoadingBestDiscountStateProduct extends ProductStates{}
-class GetSuccessBestDiscountStateProduct extends ProductStates{}
-class GetErrorBestDiscountStateProduct extends ProductStates{}
-
-class GetLoadingLowestPriceStateProduct extends ProductStates{}
-class GetSuccessLowestPriceStateProduct extends ProductStates{}
-class GetErrorLowestPriceStateProduct extends ProductStates{}
-
-class GetLoadingAllProductsStateProduct extends ProductStates{}
-class GetSuccessAllProductsStateProduct extends ProductStates{}
-class GetErrorAllProductsStateProduct extends ProductStates{}
+class GetAllProductsLoadingProduct extends ProductStates{}
+class GetAllProductsSuccessProduct extends ProductStates{}
+class GetAllProductsErrorProduct extends ProductStates{}
 
 
-class GetLoadingALLCategoryStateProduct extends ProductStates{}
-class GetSuccessALLCategoryStateProduct extends ProductStates{}
-class GetErrorALLCategoryStateProduct extends ProductStates{}
+class DeleteProductsLoadingProduct extends ProductStates{}
+class DeleteProductsSuccessProduct extends ProductStates{}
+class DeleteProductsErrorProduct extends ProductStates{}
 
 
-class GetDeleteFromCarStateProduct extends ProductStates{}
+class DeleteDetailsLoadingProduct extends ProductStates{}
+class DeleteDetailsSuccessProduct extends ProductStates{}
+class DeleteDetailsErrorProduct extends ProductStates{}
+
+
+class DeleteFavLoadingProduct extends ProductStates{}
+class DeleteFavSuccessProduct extends ProductStates{}
+class DeleteFavErrorProduct extends ProductStates{}
+
+class DeleteAllFavLoadingProduct extends ProductStates{}
+class DeleteAllFavSuccessProduct extends ProductStates{}
+class DeleteAllFavErrorProduct extends ProductStates{}
+
+
+
+class PostLoadingFavState extends ProductStates{}
+class PostSuccessFavState extends ProductStates{}
+class PostErrorFavState extends ProductStates{}
+
+class GetLoadingFavState extends ProductStates{}
+class GetSuccessFavState extends ProductStates{}
+class GetErrorFavState extends ProductStates{}
+

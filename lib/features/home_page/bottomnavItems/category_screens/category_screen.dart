@@ -5,34 +5,43 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:graduation_project/features/home_page/bottomnavItems/category_screens/subCategory.dart';
+import 'package:graduation_project/features/admin/all_users.dart';
+import 'package:graduation_project/features/admin/create_products/create_product.dart';
+import 'package:graduation_project/features/auth/models/login_model.dart';
+import 'package:graduation_project/features/home_page/bottomnavItems/category_screens/productOfSub.dart';
+import 'package:graduation_project/features/home_page/bottomnavItems/myProfile/edit_profile.dart';
+import 'package:graduation_project/styles/styles.dart';
 
 import '../../../../core/constant/components/components.dart';
 import '../../../../core/constant/const/const.dart';
+import '../../../../core/constant/end_points/end_point.dart';
 import '../../../../core/data_base/cache_helper/cache_helper.dart';
 import '../../../../generated/l10n.dart';
 import '../../../ShoppingCar/shopping_car.dart';
 import '../../../auth/login/presentation/login.dart';
+import '../../../logic/cubit.dart';
 import '../../../orders/presentation/address/all_addresses.dart';
 import '../../Products/logic/cubit.dart';
 import '../../Products/logic/states.dart';
 import '../../widgets/drawer.dart';
-import '../MyOrders_screen/my_orders_screen.dart';
 import '../favorite/favorite.dart';
 import '../myProfile/my_profile.dart';
-import '../notification/notification.dart';
 
 class CategoryScreen extends StatelessWidget {
-  const CategoryScreen({Key? key}) : super(key: key);
 
+List <String> image = [
+  'assets/images/man.png',
+  'assets/images/women.png',
+  'assets/images/baby.png'
+];
   @override
   Widget build(BuildContext context) {
-    var cat  = ProductsCubit.get(context);
+    //var cat  = ProductsCubit.get(context);
     return SafeArea(
       child: Scaffold(
         backgroundColor: gridColor,
         appBar: AppBar(
-          leading: Builder(
+          leading: token != null ?  Builder(
             builder: (BuildContext context) {
               return IconButton(
                 padding: EdgeInsets.zero,
@@ -48,7 +57,12 @@ class CategoryScreen extends StatelessWidget {
                     .of(context)
                     .openAppDrawerTooltip,
               );
-            },),
+            },) :
+IconButton(onPressed: ()
+{
+  navigateFinish(context, LoginScreen());
+}, icon: const  Icon(Icons.login,color: primaryColor,)),
+
 
 
           backgroundColor: Colors.white,
@@ -61,20 +75,46 @@ class CategoryScreen extends StatelessWidget {
 
           centerTitle: true,
           actions: [
-            Padding(
-              padding:  EdgeInsetsDirectional.only(start: 24.w,end: 24.w),
-              child: InkWell(
-                  onTap: ()
-                  {
-                    navigateTo(context, const NotificationScreen());
-                  },
-                  child: SvgPicture.asset('assets/images/Notifications.svg',width: 32.w)),
-            ),
+
             Padding(
               padding: EdgeInsetsDirectional.only(end: 24.w),
               child: InkWell(
                   onTap: () {
-                    navigateTo(context, const ShoppingCar());
+                    if(token != null)
+                    {
+                      navigateTo(context,  ShoppingCar(reverse: false,));
+
+                    } else {
+                      showDialog(context: context, builder: (context)
+                      => Dialog(
+                        child: Container(
+                          height: 200.h,
+                          width: 366.w,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(height: 40.h,),
+                              Text('يجب عليك تسجيل الدخول أولا',style: Styles.style16SemiBold,),
+                              SizedBox(height: 40.h,),
+
+
+                              Center(
+                                child: defaultButton(context: context, text: 'تسجيل الدخول',
+
+                                  toPage: () async
+                                  {
+
+
+                                    navigateFinish(context, LoginScreen());
+
+
+
+                                  },                           ),
+                              ),
+                            ], ),
+                        ),
+                      ),);
+                    }
                   },
                   child: SvgPicture.asset(
                     'assets/images/shop.svg', width: 28.w,)),
@@ -96,16 +136,15 @@ class CategoryScreen extends StatelessWidget {
                 decoration: const BoxDecoration(color: SecondColor),
 
                 accountName: Text(
-                    'sara elgamal'),
+                    "$nameF $nameL"),
                 accountEmail: Text(
-                  'sara@gmail.com'),
+                  emailUser.toString()),
                 currentAccountPicture: CircleAvatar(
                     backgroundColor: Colors.white,
                     backgroundImage: NetworkImage(
-                       'https://cdn-icons-png.flaticon.com/512/3177/3177440.png')),
+photo.toString(),
 
-
-              ),
+              ))),
 //                   InkWellWidget(icon: Icons.speed_outlined, text: S.of(context).controlPage, onTap: () {
 // navigateTo(context, const ControlPage());
 //                   }),
@@ -115,31 +154,29 @@ class CategoryScreen extends StatelessWidget {
                   icon: Icons.person, text: S
                   .of(context)
                   .profile, onTap: () {
+                AppCubit.get(context).updateMeFun();
                 navigateTo(context, MyProfile(isReverse: true));
               }),
-              InkWellWidget(icon: Icons.shopping_cart, text: S
-                  .of(context)
-                  .orders, onTap: () {
-                navigateTo(
-                    context, MyOrdersScreen(isReverse: true));
-              }),
+              // InkWellWidget(icon: Icons.shopping_cart, text: S
+              //     .of(context)
+              //     .orders, onTap: () {
+              //   navigateTo(
+              //       context, MyOrdersScreen(isReverse: true));
+              // }),
               InkWellWidget(icon: Icons.favorite, text: S
                   .of(context)
                   .favorite, onTap: () {
                 navigateTo(
                     context, FavoriteScreen(isReverse: true,));
               }),
-              InkWellWidget(icon: Icons.home_filled, text: S
-                  .of(context)
-                  .Addresses, onTap: () {
-                navigateTo(context, const AllAddresses());
+              InkWellWidget(icon: Icons.settings, text: 'الاعدادات', onTap: () {
+                navigateTo(context,  EditProfile());
               }),
 
-              // InkWellWidget(icon: Icons.language, text: S
-              //     .of(context)
-              //     .language, onTap: () {
-              //   _showLanguageMenu(context);
-              // }),
+              (token != null && role == "super admin") ?  InkWellWidget(icon: Icons.supervised_user_circle_sharp, text: 'جميع المستخدمين', onTap: () {
+                AppCubit.get(context).AllUsersFun();
+                navigateTo(context,  AllUsersScreen());
+              }) : Container(),
 
               InkWellWidget(icon: Icons.logout, text: S
                   .of(context)
@@ -149,7 +186,7 @@ class CategoryScreen extends StatelessWidget {
                   await CacheHelper.clearAll().then((value) {
                     value = true;
                     if (value) {
-                      navigateTo(context, LoginScreen());
+                      navigateFinish(context, LoginScreen());
                     }
                   });
                 },),
@@ -171,25 +208,24 @@ class CategoryScreen extends StatelessWidget {
                    physics: const BouncingScrollPhysics(),
                    child: Column(
                      children: [
-                       SizedBox(height: 50.h,),
-                       GridView.count(
+                       SizedBox(height: 30.h,),
+                       ListView.builder(
                          shrinkWrap: true,
                          physics: const NeverScrollableScrollPhysics(),
-                         mainAxisSpacing: 15.0,
-                         crossAxisSpacing: 15.0,
-
-                         crossAxisCount: 2, //number of them
-                         children:
-                         List.generate(
-                           6,
-                               (index) =>
+                         itemCount: ProductsCubit.get(context).allProducts!.length,
+                         itemBuilder: (context, index) {
+                           return Column(
+                             children: [
                                InkWell(
-                                   onTap: ()
-                                   {
-                                   navigateTo(context,  SubCategoryScreen(index) );
-                                   },
-                                   child: catBuilder()),
-                         ),
+                                 onTap: () {
+                                   navigateTo(context, ProductOfSub(indexCat: index,));
+                                 },
+                                 child: catBuilder(index, ProductsCubit.get(context).allProducts![index]),
+                               ),
+                               SizedBox(height: 20.0.h),
+                             ],
+                           );
+                         },
                        ),
 
                      ],
@@ -202,14 +238,20 @@ class CategoryScreen extends StatelessWidget {
 
            ),
         ),
+
+        floatingActionButton: (token != null && role != "user") ? FloatingActionButton(onPressed:
+            ()
+        {
+          navigateTo(context, CreateProductScreen());
+        }, child: const Icon(Icons.add),) : Container(),
       ),
     );
   }
-  Widget catBuilder () => Stack(
+  Widget catBuilder (int i,DataAll data) => Stack(
     children: [
       Container(
         height: 200.h,
-        width: 170.w,
+        width: 200.w,
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
@@ -227,25 +269,20 @@ class CategoryScreen extends StatelessWidget {
           top: 10.0.h,
           left: 30.w,
           right: 30.w,
-          child: Center(child: Image.network('https://images-eu.ssl-images-amazon.com/images/I/51wmd3ANYRL._AC_UL600_SR600,400_.jpg',height: 96.5.h,))),
+          child: Center(child: Image.asset(image[i],height: 96.5.h,))),
 
 
       Positioned(
-        top: 120.0.h,
+        top: 140.0.h,
         right: 27.0.w,
         left: 23.0.w,
         bottom: 0.h,
         child: Text(
 
 
-          'بنطلون مستورد',style: GoogleFonts.cairo(
-
-          fontSize: 14.sp,
-
-          color: SecondColor,
-          fontWeight: FontWeight.w600,
-
-        ),
+          ' ملابس ${data.category} ',style: GoogleFonts.cairo(
+            color: SecondColor, fontSize: 16.sp, fontWeight: FontWeight.w500)
+          ,
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,

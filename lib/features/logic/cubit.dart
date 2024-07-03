@@ -1,24 +1,29 @@
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:graduation_project/features/logic/repo.dart';
 import 'package:graduation_project/features/logic/states.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/constant/const/const.dart';
+import '../../core/constant/end_points/end_point.dart';
 import '../../core/data_base/cache_helper/cache_helper.dart';
 import '../../core/utils/toast.dart';
 import '../ShoppingCar/shopping_car.dart';
-import '../auth/register/reg_model/reg_model.dart';
+import '../auth/models/login_model.dart';
 import '../home_page/bottomnavItems/category_screens/category_screen.dart';
 import '../home_page/bottomnavItems/favorite/favorite.dart';
-import '../home_page/bottomnavItems/home_screen.dart';
 import '../home_page/bottomnavItems/myProfile/my_profile.dart';
 
 
 class AppCubit extends Cubit<AppStates> {
-
-  AppCubit() : super(InitialState());
+  Repository repo;
+  AppCubit(this.repo) : super(InitialState());
 
 
   static AppCubit get(context) => BlocProvider.of(context);
@@ -35,314 +40,319 @@ String? emailReg;
 String? imageReg;
 String? dateReg;
 String? nameReg;
+String? roleLogin;
 
-//   postRegister({
-//     required String name,
-//     required String email,
-//     required String phone,
-//     required String password,
-// }) async
-// {
-//   emit(PostLoadingRegisterState());
-//   await repo.RegisterUser(User(
-//     name: name,
-//     email: email,
-//     phoneNumber: phone,
-//     password: password,
-//   )).then((value) {
-//     phoneReg = value.user!.phoneNumber;
-//     idReg = value.user!.id;
-//     emailReg = value.user!.email;
-//     dateReg = value.user!.created_at;
-//     imageReg = value.user!.image;
-//     nameReg = value.user!.name;
-//
-//
-//     CacheHelper.saveData(key: 'idUser', value: idReg);
-//     CacheHelper.saveData(key: 'phoneUser', value: phoneReg);
-//     CacheHelper.saveData(key: 'emailUser', value: emailReg);
-//     CacheHelper.saveData(key: 'dateUser', value: dateReg);
-//     CacheHelper.saveData(key: 'imageUser', value: imageReg);
-//     CacheHelper.saveData(key: 'nameUser', value: nameReg);
-//
-//     showToast(text: 'تم انشاء الحساب بنجاح', state: ToastStates.success);
-//
-//     emit(PostSuccessRegisterState());
-//
-//   }).catchError((onError)
-//   {
-//     showToast(text: 'عفوا حدث خطأ', state: ToastStates.error);
-//
-//     emit(PostErrorRegisterState());
-//     debugPrint('errrrrror ${onError.toString()}');
-//
-//   });
-//
-// }
-// // String? nameUser ;
-// // String? emailUser ;
-// // String? phoneUser ;
-// // String? imageUser ;
-// // String? date ;
-// // int? idUser ;
-//
-//   postLogin({
-//
-//     required String phone,
-//     required String password,
-//   }) async
-//   {
-//     emit(PostLoadingLoginState());
-//     await repo.LoginUser(User(
-//
-//       phoneNumber: phone,
-//       password: password,
-//     )).then((value) {
-//       if(value.token != null) {
-//         phoneReg = value.user!.phoneNumber;
-//         idReg = value.user!.id;
-//         emailReg = value.user!.email;
-//         dateReg = value.user!.created_at;
-//         imageReg = value.user!.image;
-//         nameReg = value.user!.name;
-//
-//         CacheHelper.saveData(key: 'idUser', value: idReg);
-//         CacheHelper.saveData(key: 'phoneUser', value: phoneReg);
-//         CacheHelper.saveData(key: 'emailUser', value: emailReg);
-//         CacheHelper.saveData(key: 'dateUser', value: dateReg);
-//         CacheHelper.saveData(key: 'imageUser', value: imageReg);
-//         CacheHelper.saveData(key: 'nameUser', value: nameReg);
-//
-//         idUser = CacheHelper.getData(key: 'idUser');
-//         print(idUser);
-//         nameUser = CacheHelper.getData(key: 'nameUser');
-//         phoneUser = CacheHelper.getData(key: 'phoneUser');
-//         emailUser = CacheHelper.getData(key: 'emailUser');
-//         dateUser = CacheHelper.getData(key: 'dateUser');
-//         imageUser = CacheHelper.getData(key: 'imageUser');
-//         print(idUser);
-//         print(nameUser);
-//         print(phoneUser);
-//         print(emailUser);
-//         print(dateUser);
-//         print(imageUser);
-//
-//         // CacheHelper.saveData(key: 'idUserLogin', value: idUser);
-//         // CacheHelper.saveData(key: 'phoneUserLogin', value: phoneUser);
-//         // CacheHelper.saveData(key: 'emailUserLogin', value: emailUser);
-//         // CacheHelper.saveData(key: 'dateUserLogin', value: date);
-//         // CacheHelper.saveData(key: 'imageUserLogin', value: imageUser);
-//         // CacheHelper.saveData(key: 'nameUserLogin', value: nameUser);
-//         //
-//         showToast(text: 'تم تسجيل الدخول بنجاح', state: ToastStates.success);
-//
-//         emit(PostSuccessLoginState());
-//
-//       } else if (value.error != null && value.data == null && value.error != "Unauthorized"){
-//         emit(PostSuccessVerifyLoginState());
-//         showToast(text: value.error.toString(), state: ToastStates.warning);
-//
-//       }else {
-//         emit(PostErrorLoginState());
-//         showToast(text: 'عفوا حدث خطأ', state: ToastStates.error);
-//
-//       }
-//     }).catchError((onError)
-//     {
-//       showToast(text: 'عفوا حدث خطأ حاول مرة أخرى', state: ToastStates.error);
-//
-//       emit(PostErrorLoginState());
-//       debugPrint('errrrrror ${onError.toString()}');
-//
-//     });
-//
-//   }
-//
-//   sendOTPUser(
-//
-//
-//
-//   ) async
-//   {
-//     emit(PostLoadingOTPState());
-//     await repo.sendOTP(
-//         User(
-//
-//       phoneNumber: phoneReg,
-//
-//     )).then((value) {
-//       if(value.success != null) {
-//        // showToast(text: 'تم ارسال ال otp بنجاح', state: ToastStates.success);
-// print('تم ارسال ال otp بنجاح');
-//         emit(PostSuccessOTPState());
-//       } else if (value.error != null && value.error != "User not found"){
-//         emit(PostErrorOTPState());
-//         showToast(text: value.error.toString(), state: ToastStates.error);
-//
-//       }else {
-//         emit(PostErrorOTPState());
-//         showToast(text: 'عفوا حدث خطأ لا يوجد حساب لهذا الرقم', state: ToastStates.error);
-//
-//       }
-//     }).catchError((onError)
-//     {
-//       showToast(text: 'عفوا حدث خطأ حاول مرة أخرى', state: ToastStates.error);
-//
-//       emit(PostErrorOTPState());
-//       debugPrint('errrrrror ${onError.toString()}');
-//
-//     });
-//
-//   }
-//
-//   verifyPoneByOTP({
-//
-//     required String phone,
-//     required String otp,
-//
-//   }) async
-//   {
-//     emit(PostLoadingVerifyState());
-//     await repo.verifyPhone(
-//         User(
-//           phoneNumber: phone,
-//           otp: otp,
-//
-//         )).then((value) {
-//       if(value.message != null) {
-//         showToast(text: 'تم التحقق وتسجيل الدخول بنجاح', state: ToastStates.success);
-//
-//         emit(PostSuccessVerifyState());
-//
-//       } else if (value.error != null ){
-//         emit(PostErrorVerifyState());
-//         showToast(text: value.error.toString(), state: ToastStates.error);
-//
-//       }
-//     }).catchError((onError)
-//     {
-//       showToast(text: 'عفوا حدث خطأ حاول مرة أخرى', state: ToastStates.error);
-//
-//       emit(PostErrorVerifyState());
-//       debugPrint('errrrrror ${onError.toString()}');
-//
-//     });
-//
-//   }
-//
-//   addFavourite({
-//     required String productId,
-//   }) async
-//   {
-//     emit(PostLoadingFavouriteState());
-// print(productId);
-//
-// print(favProduct!.any((fav) => fav.id == productId ));
-//     bool isProductInFav = false;
-//     if (favProduct != null) {
-//       for (int i = 0; i < favProduct!.length; i++) {
-//
-//         if (favProduct![i].product!.id.toString() == productId.toString()) {
-//
-//           isProductInFav = true;
-//           break;
-//         }
-//       }
-//     }
-//     if (isProductInFav)
-//     {
-//       showToast(
-//         text: 'هذا العنصر مضاف من قبل',
-//         state: ToastStates.warning,
-//       );
-//       emit(PostWarningFavouriteState());
-//
-//     }else {
-//       await repo.addFavourite(
-//         AddFav(user_id: idUser.toString()),
-//         productId: productId,
-//
-//       ).then((value) {
-//         if(value.message != null) {
-//
-//           showToast(text: 'تم إضافة المنتج إلى المفضلة بنجاح', state: ToastStates.success);
-//
-//           emit(PostSuccessFavouriteState());
-//           getFavourite();
-//         }
-//       }).catchError((onError)
-//       {
-//         showToast(text: 'عفوا حدث خطأ', state: ToastStates.error);
-//
-//         emit(PostErrorFavouriteState());
-//         debugPrint('errrrrror ${onError.toString()}');
-//
-//       });
-//
-//     }
-//
-//
-//   }
-// List<DataFavoriteGet>? favProduct = [];
-//   getFavourite() async
-//   {
-//     emit(PostLoadingGetFavouriteState());
-//     await repo.getAllFavourite(
-//       AddFav(
-//           user_id: idUser.toString()),
-//
-//     ).then((value) {
-//       favProduct = value.data;
-//      // if(value.message != null) {
-//       //  showToast(text: 'تم إضافة المنتج إلى المفضلة بنجاح', state: ToastStates.success);
-//
-//         emit(PostSuccessGetFavouriteState());
-//
-//      // }
-//     }).catchError((onError)
-//     {
-//       showToast(text: 'عفوا حدث خطأ', state: ToastStates.error);
-//
-//       emit(PostErrorGetFavouriteState());
-//       debugPrint('errrrrror ${onError.toString()}');
-//
-//     });
-//
-//   }
-//
-//   deleteFavourite({
-//     required String productId,
-//   }) async
-//   {
-//     emit(PostLoadingDeleteFavouriteState());
-//     await repo.deleteTheFavourite(
-//       AddFav(user_id: idUser.toString()),
-//       productId: productId,
-//
-//
-//     ).then((value) {
-//       if(value.message != null) {
-//         showToast(text: value.message.toString(), state: ToastStates.success);
-//
-//         emit(PostSuccessDeleteFavouriteState());
-//         getFavourite();
-//       }
-//     }).catchError((onError)
-//     {
-//       showToast(text: 'عفوا حدث خطأ', state: ToastStates.error);
-//
-//       emit(PostErrorDeleteFavouriteState());
-//       debugPrint('errrrrror ${onError.toString()}');
-//
-//     });
-//
-//   }
+  postRegister({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String phone,
+    required String role,
+    required String password,
+}) async
+{
+  emit(PostLoadingRegisterState());
+  await repo.signUp(
+    SignUpModelRequest(
+       firstName: firstName,
+      lastName: lastName,
+      email: email,
+      phone: phone,
+      role: role,
+      password: password,
+      passwordConfirm: password,
+    )
+  ).then((value) {
+    roleLogin = value.data!.user!.role ;
+
+    // phoneReg = value.user!.phoneNumber;
+    // idReg = value.user!.id;
+    // emailReg = value.user!.email;
+    // dateReg = value.user!.created_at;
+    // imageReg = value.user!.image;
+    // nameReg = value.user!.name;
+    //
+    //
+    CacheHelper.saveData(key: 'token', value: value.token);
+    CacheHelper.saveData(key: 'roleLogin', value: roleLogin);
+    CacheHelper.saveData(key: 'nameF', value: value.data!.user!.firstName);
+    CacheHelper.saveData(key: 'nameL', value: value.data!.user!.lastName);
+    CacheHelper.saveData(key: 'photo', value: value.data!.user!.file);
+    CacheHelper.saveData(key: 'email', value: value.data!.user!.email);
+    CacheHelper.saveData(key: 'userId', value: value.data!.user!.id);
+
+    // CacheHelper.saveData(key: 'emailUser', value: emailReg);
+    // CacheHelper.saveData(key: 'dateUser', value: dateReg);
+    // CacheHelper.saveData(key: 'imageUser', value: imageReg);
+    // CacheHelper.saveData(key: 'nameUser', value: nameReg);
+    if(value.token != null) {
+      showToast(text: 'تم انشاء الحساب بنجاح', state: ToastStates.success);
+
+      emit(PostSuccessRegisterState());
+      token = CacheHelper.getData(key: 'token');
+      print(token);
+
+      role = CacheHelper.getData(key: 'roleLogin');
+      print(role);
+
+      emailUser = CacheHelper.getData(key: 'email');
+      photo = CacheHelper.getData(key: 'photo');
+      nameF = CacheHelper.getData(key: 'nameF');
+      nameL = CacheHelper.getData(key: 'nameL');
+      userId = CacheHelper.getData(key: 'userId');
+    }  else if (value.status == "fail"
+    && value.data == null ){
+    emit(PostErrorRegisterState());
+    showToast(text: 'هذا البريد مستخدم من قبل', state: ToastStates.warning);
+
+    }else {
+    emit(PostErrorRegisterState());
+    showToast(text: 'عذرا البيانات غير صحيحه', state: ToastStates.error);
+
+    }
+  }).catchError((onError)
+  {
+    showToast(text: 'عفوا حدث خطأ', state: ToastStates.error);
+
+    emit(PostErrorRegisterState());
+    debugPrint('errrrrror ${onError.toString()}');
+
+  });
+
+}
 
 
+  postLogin({
+
+    required String email,
+    required String password,
+  }) async
+  {
+    emit(PostLoadingLoginState());
+    await repo.loginSales(
+        LoginModelRequest(
+          email: email,
+          password: password
+        )
+    ).then((value) {
+      if(value.token != null) {
+        roleLogin = value.data!.user!.role ;
 
 
+        CacheHelper.saveData(key: 'token', value: value.token);
+        CacheHelper.saveData(key: 'roleLogin', value: roleLogin);
+        CacheHelper.saveData(key: 'nameF', value: value.data!.user!.firstName);
+        CacheHelper.saveData(key: 'nameL', value: value.data!.user!.lastName);
+        CacheHelper.saveData(key: 'photo', value: value.data!.user!.file);
+        CacheHelper.saveData(key: 'email', value: value.data!.user!.email);
+        CacheHelper.saveData(key: 'userId', value: value.data!.user!.id);
+
+        // phoneReg = value.user!.phoneNumber;
+        // idReg = value.user!.id;
+        // emailReg = value.user!.email;
+        // dateReg = value.user!.created_at;
+        // imageReg = value.user!.image;
+        // nameReg = value.user!.name;
 
 
+         showToast(text: 'تم تسجيل الدخول بنجاح', state: ToastStates.success);
+
+        emit(PostSuccessLoginState());
+        token = CacheHelper.getData(key: 'token');
+        print(token);
+
+        role = CacheHelper.getData(key: 'roleLogin');
+        print(role);
+
+        emailUser = CacheHelper.getData(key: 'email');
+        photo = CacheHelper.getData(key: 'photo');
+        nameF = CacheHelper.getData(key: 'nameF');
+        nameL = CacheHelper.getData(key: 'nameL');
+        userId = CacheHelper.getData(key: 'userId');
+      } else if (value.status == "fail"
+          || value.data == null ){
+        emit(PostSuccessVerifyLoginState());
+        showToast(text: 'عذرا البيانات غير صحيحه', state: ToastStates.warning);
+
+      }else {
+        emit(PostErrorLoginState());
+        showToast(text: 'عذرا البيانات غير صحيحه', state: ToastStates.error);
+
+      }
+    }).catchError((onError)
+    {
+      showToast(text: 'عفوا حدث خطأ حاول مرة أخرى', state: ToastStates.error);
+
+      emit(PostErrorLoginState());
+      debugPrint('errrrrror ${onError.toString()}');
+
+    });
+
+  }
+
+
+  DataUpdateProfile? updateData ;
+  updateMeFun() async
+  {
+    emit(GetLoadingUpdateMeState());
+    await repo.updateMe().then((value) {
+      if(value.status == "success") {
+
+updateData = value.data;
+
+        emit(GetSuccessUpdateMeState());
+CacheHelper.saveData(key: 'nameF', value: value.data!.data!.firstName);
+CacheHelper.saveData(key: 'nameL', value: value.data!.data!.lastName);
+CacheHelper.saveData(key: 'photo', value: value.data!.data!.file);
+CacheHelper.saveData(key: 'email', value: value.data!.data!.email);
+
+emailUser = CacheHelper.getData(key: 'email');
+photo = CacheHelper.getData(key: 'photo');
+nameF = CacheHelper.getData(key: 'nameF');
+nameL = CacheHelper.getData(key: 'nameL');
+      }else {
+        emit(GetErrorUpdateMeState());
+        showToast(text: 'عذرا حدث خطأ', state: ToastStates.error);
+
+      }
+    }).catchError((onError)
+    {
+      showToast(text: 'عفوا حدث خطأ حاول مرة أخرى', state: ToastStates.error);
+
+      emit(GetErrorUpdateMeState());
+      debugPrint('errrrrror ${onError.toString()}');
+
+    });
+
+  }
+
+  DataAllUsers? allUsers ;
+  AllUsersFun() async
+  {
+    emit(GetLoadingAllUsersState());
+    await repo.AllUsers().then((value) {
+      if(value.status == "success") {
+        allUsers = value.data;
+
+        emit(GetSuccessAllUsersState());
+
+      }else {
+        emit(GetErrorAllUsersState());
+        showToast(text: 'عذرا حدث خطأ', state: ToastStates.error);
+
+      }
+    }).catchError((onError)
+    {
+      showToast(text: 'عفوا حدث خطأ حاول مرة أخرى', state: ToastStates.error);
+
+      emit(GetErrorAllUsersState());
+      debugPrint('errrrrror ${onError.toString()}');
+
+    });
+
+  }
+
+  deleteUsersFun({required userId}) async
+  {
+    emit(DeleteLoadingUsersState());
+    await repo.deleteUsers(userId).then((value) {
+
+      emit(DeleteSuccessUsersState());
+      showToast(text: 'تم الحذف بنجاح', state: ToastStates.success);
+
+
+    }).catchError((onError)
+    {
+      showToast(text: 'عفوا حدث خطأ حاول مرة أخرى', state: ToastStates.error);
+
+      emit(DeleteErrorUsersState());
+      debugPrint('errrrrror ${onError.toString()}');
+
+    });
+
+  }
+
+  Future<void> updateUserProfile({
+    required String firstName,
+    required String lastName,
+    required String email,
+
+    File? image,
+  }) async {
+    const String url = 'https://shopping-gp-2b5338c8c372.herokuapp.com/users/updateMe';
+
+    Dio dio = Dio();
+
+
+    var formData = FormData();
+    formData.fields.addAll([
+      MapEntry('firstName', firstName),
+      MapEntry('lastName', lastName),
+      MapEntry('email', email),
+
+
+    ],
+
+
+    );
+
+    if (image != null) {
+      String filename = image.path
+          .split('/')
+          .last;
+      formData.files.add(
+          MapEntry(
+            'photo',
+            await MultipartFile.fromFile(
+                image.path, filename: filename),
+          ));
+    }
+
+
+    try {
+      final response = await dio.patch(
+        url,
+        data: formData,
+
+          options: Options(
+              followRedirects: true,
+              validateStatus:
+                  (status) => status != null && status < 500,
+              maxRedirects: 0,
+              headers: {
+                'Authorization': 'Bearer $token',
+                'Accept': '*/*',
+                'Content-Type': 'multipart/form-data',
+              }
+
+          ),
+
+      );
+
+      if (response.statusCode == 200) {
+        print('Profile updated successfully');
+          showToast(text: 'تم التعديل بنجاح', state: ToastStates.success);
+emit(EditSuccessAllUsersState());
+          CacheHelper.saveData(key: 'nameF', value: response.data!.user!.firstName);
+        CacheHelper.saveData(key: 'nameL', value: response.data!.user!.lastName);
+        CacheHelper.saveData(key: 'photo', value: response.data!.user!.file);
+        CacheHelper.saveData(key: 'email', value: response.data!.user!.email);
+
+        emailUser = CacheHelper.getData(key: 'email');
+        photo = CacheHelper.getData(key: 'photo');
+        nameF = CacheHelper.getData(key: 'nameF');
+        nameL = CacheHelper.getData(key: 'nameL');
+      } else {
+        print('Failed to update profile');
+        showToast(text: 'حدث خطأ حاول مرة اخرى', state: ToastStates.error);
+
+      }
+    } catch (e) {
+      print('Error updating profile: $e');
+     // showToast(text: 'حدث خطأ حاول مرة اخرى', state: ToastStates.error);
+
+    }
+  }
 
   var suffixVerify = SvgPicture.asset(
     'assets/images/opennnn.svg',
@@ -408,24 +418,15 @@ String? nameReg;
   [
 
      FavoriteScreen(isReverse: false),
-    const CategoryScreen(),
-    const ShoppingCar(),
+     CategoryScreen(),
+    // ShoppingCar(reverse: false,),
      MyProfile(isReverse: false,),
-
-
 
 
   ];
 
 
-  // List <String> titles =
-  // [
-  //   'الرئيسية',
-  //   'الشبكة الطبية',
-  //   'الكارت الطبي',
-  //   'التقديم',
-  //
-  // ];
+
 
   void changeBottomIndex(int index) {
     currentIndex = index;

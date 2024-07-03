@@ -319,7 +319,7 @@ fontWeight: FontWeight.bold,
     icon:
        const Icon(Icons.arrow_back_ios,color: Colors.black,),
     onPressed: (){
-      Navigator.pushReplacement(context, SliderLeft(page: const HomePage(), ));
+      Navigator.pop(context);
      // ClinicCubit.get(context).clearData();
     },
   ) : Container(),
@@ -327,6 +327,47 @@ fontWeight: FontWeight.bold,
   actions: actions,
 
 );
+Widget defaultButtonSmall(
+    {
+      required BuildContext context,
+      required String text,
+      required double width,
+      required double height,
+      required double textSize,
+
+      required Function() toPage}) =>
+    MaterialButton(
+      onPressed: toPage,
+      //padding: EdgeInsets.symmetric(vertical: 13.h),
+      height: 24.h,
+      minWidth: width,
+
+      shape: RoundedRectangleBorder(
+
+        borderRadius: BorderRadius.circular(30.r),
+      ),
+
+      // color: primaryColor3,
+      child:  Container(
+        height: height,
+        width: width,
+
+        decoration: BoxDecoration(
+          color: primaryColor,
+          borderRadius: BorderRadius.circular(30.r),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: GoogleFonts.cairo(fontSize:  textSize  ,fontWeight: FontWeight.w700
+                ,color: Colors.white),
+          ),
+        ),
+
+
+      ),
+
+    );
 
 Widget loader() =>  Container(
   height: 200.h,

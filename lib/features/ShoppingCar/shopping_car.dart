@@ -10,35 +10,43 @@ import 'package:graduation_project/features/ShoppingCar/shopping_logic/shopping_
 
 import '../../core/constant/components/components.dart';
 import '../../core/constant/const/const.dart';
+import '../../core/constant/end_points/end_point.dart';
 import '../../generated/l10n.dart';
+import '../../styles/styles.dart';
+import '../auth/login/presentation/login.dart';
+import '../auth/models/login_model.dart';
+import '../orders/presentation/address/add_new_address.dart';
 import '../orders/presentation/address/all_addresses.dart';
 
 bool cardBook = false ;
-// double calculateTotalPrice(context) {
-//   double totalPrice = 0.0;
-//
-//   for (int i = 0; i < CardCubit.get(context).cardProducts!.length; i++) {
-//     double itemPrice = double.parse(CardCubit.get(context).cardProducts![i].price.toString());
-//     int quantity = CardCubit.get(context).cardProducts![i].quantity!.toInt();
-//
-//     totalPrice += itemPrice * quantity;
-//   }
-//
-//   return totalPrice;
-// }
-class ShoppingCar extends StatefulWidget {
-  const ShoppingCar({Key? key}) : super(key: key);
+double calculateTotalPrice(context) {
+  double totalPrice = 0.0;
 
+  for (int i = 0; i < CardCubit.get(context).cardProducts!.length; i++) {
+    double itemPrice = double.parse(CardCubit.get(context).cardProducts![i].priceAfterDiscount.toString());
+   // int quantity = CardCubit.get(context).cardProducts![i].quantity!.toInt();
+
+    totalPrice += itemPrice ;
+  }
+
+  return totalPrice;
+}
+class ShoppingCar extends StatefulWidget {
+  bool reverse;
+
+  ShoppingCar({required this.reverse});
   @override
   State<ShoppingCar> createState() => _ShoppingCarState();
 }
 
 class _ShoppingCarState extends State<ShoppingCar> {
 
+
 @override
   void initState() {
-
-    // CardCubit.get(context).getUserCard(userId:
+if(token != null) {
+  CardCubit.get(context).getUserCard();
+}
     // idUser.toString());
 
 
@@ -48,8 +56,7 @@ class _ShoppingCarState extends State<ShoppingCar> {
   }
   @override
   void didChangeDependencies() {
-    // CardCubit.get(context).getUserCard(userId:
-    // idUser!.toString());
+     CardCubit.get(context).getUserCard();
 
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
@@ -61,13 +68,20 @@ class _ShoppingCarState extends State<ShoppingCar> {
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+  var cubit = CardCubit.get(context);
+    return token != null ? Scaffold(
       backgroundColor: gridColor,
       appBar: appBarDefaultTheme
         (
           context: context,
-          isReverse: true,
-          title: S.of(context).shopCar
+          isReverse: widget.reverse,
+          title: S.of(context).shopCar,
+        actions: [
+          TextButton(onPressed: ()
+          {
+            cubit.deleteAllCard(context);
+          }, child: const Text('افراغ السلة',style: TextStyle(color: Colors.red),))
+        ],
       ),
       body:
 
@@ -81,12 +95,12 @@ class _ShoppingCarState extends State<ShoppingCar> {
 
                 },
                 builder: (context, state) {
-                  if(state is PostLoadingDeleteCardState ||  state is PostLoadingGetCardState) {
+                  if(state is PostLoadingCardState ||  state is GetLoadingCardState || state is DeleteLoadingCardState || state is DeleteAllLoadingCardState) {
 
                     return Center(child: loader());
                   } else {
                     return
-
+cubit.cardProducts!.isNotEmpty ?
                     Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,24 +112,24 @@ class _ShoppingCarState extends State<ShoppingCar> {
                             physics: const NeverScrollableScrollPhysics(),
     itemBuilder: (context, i) {
 
-                  return listViewItemsCar(i,2);
+                  return listViewItemsCar(cubit.cardProducts![i]);
                   },
                             separatorBuilder: (context, i) =>
                             const Divider(color: fillRectangular),
                             itemCount:
-                           5),
+                           cubit.cardProducts!.length),
 
                         const Divider(color: fillRectangular),
                         Row(
                           children: [
                             Flexible(child: Text(
-                              'مجموع قيمة الفاتورة بالريال السعودي ',
+                              'مجموع قيمة الفاتورة :  ',
                               style: GoogleFonts.cairo(
                                   fontSize: 16.sp, fontWeight: FontWeight.w700),)),
                             const Spacer(),
 
                             /// here the total price
-                            Text('663 EGP ', style: GoogleFonts.cairo(
+                            Text("${calculateTotalPrice(context).toString()} جنيها ", style: GoogleFonts.cairo(
                                 fontSize: 16.sp, fontWeight: FontWeight.w700),),
 
                           ],
@@ -124,8 +138,8 @@ class _ShoppingCarState extends State<ShoppingCar> {
                         MaterialButton(
 
                           onPressed: () {
-
-                              navigateTo(context, const AllAddresses());
+                              CardCubit.get(context).paymentFun();
+                              navigateTo(context,  AddNewAddress());
 
                             setState(() {
                               cardBook = true ;
@@ -161,8 +175,8 @@ class _ShoppingCarState extends State<ShoppingCar> {
                         ),
                         SizedBox(height: 20.h),
                       ],
-                    );
-                  // : nothing(text: S.of(context).noShop);
+                    )
+                   : nothing(text: S.of(context).noShop);
                   }
                 },
               ),
@@ -170,14 +184,34 @@ class _ShoppingCarState extends State<ShoppingCar> {
           )
 
 
-    );
+    ) : Scaffold(
+    body:  Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text('ليس لديك حساب قم بتسجيل دخولك',style: Styles.style16SemiBold,),
+          SizedBox(height: 20.h,),
+          defaultButton(
+            context: context, text: 'تسجيل الدخول', toPage: ()
+          {
+            navigateFinish(context, LoginScreen());
+          },),
+
+        ],
+      ),
+
+    ) ,
+
+
+  );
 
 
   }
 
 bool isQuantityChanged = false;
 // int  mountProduct = 1;
-  Widget listViewItemsCar ( int i, int currentQuantity) {
+  Widget listViewItemsCar ( ProductsDetailsForCartModel cart) {
 
 
 
@@ -210,10 +244,11 @@ bool isQuantityChanged = false;
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             image: DecorationImage(
-
+fit: BoxFit.cover,
               image: NetworkImage(
 
-                 'https://images-eu.ssl-images-amazon.com/images/I/51wmd3ANYRL._AC_UL600_SR600,400_.jpg' ,
+cart.imageOfProduct.toString(),
+
               ),
 
             ),
@@ -239,7 +274,7 @@ bool isQuantityChanged = false;
         right: 120.w,
         left: 5.w,
         child: Text(
-          'قميص',
+          cart.product!.name.toString(),
 
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -253,110 +288,141 @@ bool isQuantityChanged = false;
 
       ),
       Positioned(
+        top: 110.h,
+        right: 120.w,
+        left: 131.w,
+        child:  Text('اللون : ',style: GoogleFonts.cairo(fontSize: 16.sp,fontWeight: FontWeight.w700),),
+
+      ),
+      Positioned(
+        top: 140.h,
+        right: 120.w,
+        left: 131.w,
+        child:  Text("المقاس : ",style: GoogleFonts.cairo(fontSize: 16.sp,fontWeight: FontWeight.w700),),
+
+      ),
+      Positioned(
         top: 70.h,
         right: 175.w,
         left: 5.w,
         child:  Text(
-            '521.2 EGP'
+            cart.priceAfterDiscount.toString()
+          ,style: GoogleFonts.cairo(fontSize: 16.sp,fontWeight: FontWeight.w700,color: SecondColor),),
+
+      ),
+      // Positioned(
+      //   top: 120.h,
+      //   right: 100.w,
+      //
+      //   child: Stack(
+      //     children: [
+      //       Container(
+      //           height: 50.h,
+      //           width: 150.w,
+      //
+      //           decoration: BoxDecoration(
+      //             color: gridColor,
+      //             borderRadius: BorderRadius.circular(20),
+      //           ),
+      //           child: Center(
+      //               child:
+      //           Text(
+      //               currentQuantity.toString()))),
+      //       Positioned(
+      //         right: 0.w,
+      //         child: Container(
+      //           height: 50.h,
+      //           width: 50.w,
+      //           decoration: BoxDecoration(
+      //             color: Colors.pinkAccent.shade100.withOpacity(0.4),
+      //
+      //             shape: BoxShape.circle,
+      //
+      //           ),
+      //           child: IconButton(
+      //             icon: const Icon(Icons.add),
+      //             onPressed: () {
+      //               setState(() {
+      //                 currentQuantity++;
+      //
+      //                 // EditCardCubit.get(context)
+      //                 //     .editQuantity(
+      //                 //   context,
+      //                 //   cardId: CardCubit.get(context).cardProducts![i].id.toString(),
+      //                 //   quantity: currentQuantity.toString(),
+      //                 // );
+      //
+      //
+      //                 print(currentQuantity);
+      //
+      //               });
+      //
+      //
+      //             },
+      //           ),
+      //         ),
+      //       ),
+      //
+      //       Positioned(
+      //         left: 0.w,
+      //         child: Container(
+      //           height: 50.h,
+      //           width: 50.w,
+      //           decoration: BoxDecoration(
+      //             color: Colors.cyan.shade100.withOpacity(0.4),
+      //
+      //             shape: BoxShape.circle,
+      //
+      //           ),
+      //           child :
+      //           IconButton(
+      //             icon: const Icon(Icons.remove),
+      //             onPressed: () {
+      //               setState(() {
+      //                 if (     currentQuantity > 1) {
+      //                   setState(() {
+      //                     currentQuantity--;
+      //
+      //                     // EditCardCubit.get(context)
+      //                     //     .editQuantity(
+      //                     //   context,
+      //                     //   cardId: CardCubit.get(context).cardProducts![i].id.toString(),
+      //                     //   quantity: currentQuantity.toString(),
+      //                     // );
+      //
+      //                     currentQuantity = currentQuantity;
+      //                     print(currentQuantity);
+      //
+      //                   });
+      //                 }
+      //
+      //               });
+      //             },
+      //           ),
+      //         ),
+      //       ),
+      //
+      //     ],
+      //   ),
+      // ),
+      Positioned(
+        top: 110.h,
+        right: 180.w,
+        left: 5.w,
+        child:  Text(
+          cart.color.toString()
           ,style: GoogleFonts.cairo(fontSize: 16.sp,fontWeight: FontWeight.w700,color: SecondColor),),
 
       ),
       Positioned(
-        top: 120.h,
-        right: 100.w,
+        top: 140.h,
+        right: 200.w,
+        left: 5.w,
+        child:  Text(
+          cart.size.toString()
+          ,style: GoogleFonts.cairo(fontSize: 16.sp,fontWeight: FontWeight.w700,color: SecondColor),),
 
-        child: Stack(
-          children: [
-            Container(
-                height: 50.h,
-                width: 150.w,
-
-                decoration: BoxDecoration(
-                  color: gridColor,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Center(
-                    child:
-                Text(
-                    currentQuantity.toString()))),
-            Positioned(
-              right: 0.w,
-              child: Container(
-                height: 50.h,
-                width: 50.w,
-                decoration: BoxDecoration(
-                  color: Colors.pinkAccent.shade100.withOpacity(0.4),
-
-                  shape: BoxShape.circle,
-
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () {
-                    setState(() {
-                      currentQuantity++;
-
-                      // EditCardCubit.get(context)
-                      //     .editQuantity(
-                      //   context,
-                      //   cardId: CardCubit.get(context).cardProducts![i].id.toString(),
-                      //   quantity: currentQuantity.toString(),
-                      // );
-
-
-                      print(currentQuantity);
-
-                    });
-
-
-                  },
-                ),
-              ),
-            ),
-
-            Positioned(
-              left: 0.w,
-              child: Container(
-                height: 50.h,
-                width: 50.w,
-                decoration: BoxDecoration(
-                  color: Colors.cyan.shade100.withOpacity(0.4),
-
-                  shape: BoxShape.circle,
-
-                ),
-                child :
-                IconButton(
-                  icon: const Icon(Icons.remove),
-                  onPressed: () {
-                    setState(() {
-                      if (     currentQuantity > 1) {
-                        setState(() {
-                          currentQuantity--;
-
-                          // EditCardCubit.get(context)
-                          //     .editQuantity(
-                          //   context,
-                          //   cardId: CardCubit.get(context).cardProducts![i].id.toString(),
-                          //   quantity: currentQuantity.toString(),
-                          // );
-
-                          currentQuantity = currentQuantity;
-                          print(currentQuantity);
-
-                        });
-                      }
-
-                    });
-                  },
-                ),
-              ),
-            ),
-
-          ],
-        ),
       ),
-
       Positioned(
         top: 120.h,
         left: 20.w,
@@ -364,9 +430,9 @@ bool isQuantityChanged = false;
             onPressed: ()
             {
               setState(() {
-                // CardCubit.get(context)
-                //     .deleteFromCard(cardId:
-                // CardCubit.get(context).cardProducts![i].id.toString());
+                CardCubit.get(context)
+                    .deleteFromCard(context,cardId:
+               cart.id.toString(),productId:  cart.product!.id.toString());
 
 
 

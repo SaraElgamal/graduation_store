@@ -7,6 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:graduation_project/features/logic/cubit.dart';
+import 'package:graduation_project/features/logic/states.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/constant/components/components.dart';
@@ -31,21 +33,20 @@ class _EditProfileState extends State<EditProfile> {
     // TODO: implement initState
     super.initState();
   }
-  var fullName = TextEditingController();
+  var fName = TextEditingController();
+  var lName = TextEditingController();
 
-   String selectedGender = '';
-   bool  isMale = false;
+
 
   var emailController = TextEditingController();
 String? currentImage;
 void getDataProfile()
 {
- //ProfileUserCubit.get(context).getProfile();
 
- fullName.text = 'sara elgamal';
- emailController.text = 'sara@gmail.com';
- selectedGender = 'female';
- currentImage = 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png';
+ fName.text = AppCubit.get(context).updateData!.data!.firstName.toString();
+ lName.text = AppCubit.get(context).updateData!.data!.lastName.toString();
+ emailController.text = AppCubit.get(context).updateData!.data!.email.toString();
+ currentImage = AppCubit.get(context).updateData!.data!.file.toString();
 }
 
   File? _image;
@@ -53,13 +54,11 @@ void getDataProfile()
   Future getImage() async {
     var image;
 
-    // Use XFile instead of var to explicitly type the result
-    XFile? xImage = await ImagePicker.platform.getImage(source: ImageSource.gallery);
+    XFile? xImage = await ImagePicker.platform
+        .getImage(source: ImageSource.camera);
 
-    // Check if xImage is not null before converting it to File
     if (xImage != null) {
       setState(() {
-        // Use File constructor to convert XFile to File
         _image = File(xImage.path);
         pickedFile = xImage;
       });
@@ -74,21 +73,24 @@ void getDataProfile()
           title: S.of(context).edit_profile),
       body: Padding(
         padding:  EdgeInsets.symmetric(horizontal: 20.w),
-        child: BlocConsumer<ProfileUserCubit,ProfileUserProfileState>(
+        child: BlocConsumer<AppCubit,AppStates>(
           listener: (context, state) {
-
+if(state is EditSuccessAllUsersState)
+{
+  Navigator.pop(context);
+}
           },
           builder: (context, state) =>  SingleChildScrollView(
             child: Column(
               children: [
                 SizedBox(height: 30.h),
 
-Stack(children: [
+                Stack(children: [
  pickedFile == null ?  CircleAvatar(
     radius: 70.0.r,
 // here to get this image picker
     backgroundImage: NetworkImage
-      ('https://cdn-icons-png.flaticon.com/512/3177/3177440.png'),
+      (AppCubit.get(context).updateData!.data!.file.toString()),
 
   ) :
  CircleAvatar(
@@ -105,9 +107,7 @@ bottom: 0.0,
     child:  InkWell(
       onTap: () async
       {
-        // to do image picker
-      //  print(ProfileUserCubit.get(context).profile!.imageProfile.toString());
-        getImage();
+           getImage();
       },
       child: CircleAvatar(
         backgroundColor: Colors.cyan.shade100,
@@ -129,44 +129,29 @@ bottom: 0.0,
                       return S.of(context).validate;
                     }
                   },
-                  controller: fullName,
-                  label: S.of(context).FullName,
+                  controller: fName,
+                  label: 'الاسم الأول',
                   // hint: 'الاسم الاول',
                   keyboardType: TextInputType.name,
                   suffix: Container(),
 
                 ),
                 SizedBox(height: 24.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: fillRectangular),
-                    borderRadius: BorderRadius.circular(10),
+                defaultTextFormFeild(
+                  context,
 
-                  ),
-                  child: DropdownButton<String>(
-                    borderRadius: BorderRadius.circular(10),
-                    isExpanded: true,
-                    hint: Text(S.of(context).gender),
-                    value: isMale ? maleValue : femaleValue,
-                    onChanged: (value) {
-                      log(value.toString());
-                      setState(() {
-                        isMale = value == maleValue;
-                       // print('$isMale $value $maleValue');
-                      });
-                    },
-                    items: [
-                      DropdownMenuItem(
-                        value: maleValue,
-                        child: Text(S.of(context).male),
-                      ),
-                      DropdownMenuItem(
-                        value: femaleValue,
-                        child: Text(S.of(context).female),
-                      ),
-                    ],
-                  ),
+                  validate:  (value)
+                  {
+                    if (value == null || value == '') {
+                      return S.of(context).validate;
+                    }
+                  },
+                  controller: lName,
+                  label: 'الاسم الأخير',
+                  // hint: 'الاسم الاول',
+                  keyboardType: TextInputType.name,
+                  suffix: Container(),
+
                 ),
 
                 SizedBox(height: 40.h),
@@ -192,19 +177,20 @@ bottom: 0.0,
                     onPressed: ()
                     {
                       if(pickedFile != null){
-                        // ProfileUserCubit.get(context).submitFormData(
-                        //     name: fullName.text,
-                        //     gender: isMale ? '0' : '1',
-                        //     image:   XFile(pickedFile!.path),
-                        //     email: emailController.text);
+                       AppCubit.get(context).updateUserProfile(
+                         firstName: fName.text ,
+                         email: emailController.text,
+                         lastName: lName.text,
+                         image: File(pickedFile!.path),
+                       );
                       } else
                       {
-                        // ProfileUserCubit.get(context).submitFormData(
-                        //     name: fullName.text,
-                        //     gender: isMale ? '0' : '1',
-                        //     email: emailController.text,
-                        //
-                        // );
+                        AppCubit.get(context).updateUserProfile(
+                          firstName: fName.text ,
+                          email: emailController.text,
+                          lastName: lName.text,
+
+                        );
                       }
 
 

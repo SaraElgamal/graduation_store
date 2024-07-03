@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:graduation_project/features/admin/create_products/create_product.dart';
 import '../../../../core/constant/components/components.dart';
 import '../../../../core/constant/const/const.dart';
 import '../../../../generated/l10n.dart';
@@ -12,7 +13,7 @@ import '../../../logic/cubit.dart';
 import '../../../logic/states.dart';
 import '../../register/presentation/register.dart';
 
-var phoneLogin = TextEditingController();
+var emailLogin = TextEditingController();
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({Key? key}) : super(key: key);
@@ -31,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //  var call = AppCubit.get(context);
+      var call = AppCubit.get(context);
 
     return SafeArea(
       child: Form(
@@ -75,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         SizedBox(
                           height: 40.78.h,
                         ),
-                        Text(S.of(context).mobile_number,style:  GoogleFonts.cairo(
+                        Text('البريد الالكتروني',style:  GoogleFonts.cairo(
                           color: primaryColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 18.sp,
@@ -85,21 +86,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         defaultTextFormFeild(
                           context,
-
+                          suffix: Container(),
+                          controller: emailLogin,
                           validate: (value) {
                             if (value == null || value == '') {
                               return S.of(context).validate;
                             }
-                            if (value.length < 11 ) {
-                              return S.of(context).condition_phone;
+                            if (!value.contains('@')) {
+                              return S.of(context).condition_email;
                             }
                           },
-                          controller: phoneLogin,
-                          label: S.of(context).mobile_number_text,
-
-                          // hint: 'رقم التيلفون',
-                          keyboardType: TextInputType.phone,
-                          suffix: Container(),
+                          label: S.of(context).email,
+                          // hint: 'البريد الالكتروني',
+                          keyboardType: TextInputType.emailAddress,
                         ),
                         SizedBox(height: 24.h),
                         Text(S.of(context).pass,style:  GoogleFonts.cairo(
@@ -148,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
 //     navigateTo(context,  VerificationPhoneAndEmail());
 // }
 if(state is PostSuccessLoginState) {
-
+  navigateFinish(context,  const HomePage());
 }
                           },
                           builder: (context, state) {
@@ -164,11 +163,11 @@ if(state is PostSuccessLoginState) {
     text: S.of(context).login,
     toPage: () {
     if (formKey.currentState!.validate()) {
-      navigateFinish(context, const HomePage());
-    // AppCubit.get(context).postLogin(
-    // phone : phoneLogin.text,
-    // password : passwordLogin.text,
-    // );
+
+    AppCubit.get(context).postLogin(
+    email : emailLogin.text,
+    password : passwordLogin.text,
+    );
     // AppCubit.get(context).sendOTPUser(
     //   phone : phoneLogin.text,
     // );
