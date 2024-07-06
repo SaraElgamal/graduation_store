@@ -80,6 +80,8 @@ if(token != null) {
           TextButton(onPressed: ()
           {
             cubit.deleteAllCard(context);
+            CardCubit.get(context).products = [] ;
+
           }, child: const Text('افراغ السلة',style: TextStyle(color: Colors.red),))
         ],
       ),

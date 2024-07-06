@@ -30,9 +30,10 @@ import '../myProfile/my_profile.dart';
 class CategoryScreen extends StatelessWidget {
 
 List <String> image = [
-  'assets/images/man.png',
+
   'assets/images/women.png',
-  'assets/images/baby.png'
+  'assets/images/baby.png',
+ 'assets/images/man.png',
 ];
   @override
   Widget build(BuildContext context) {

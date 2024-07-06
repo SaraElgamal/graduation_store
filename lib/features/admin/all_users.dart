@@ -1,6 +1,7 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -34,178 +35,189 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
   int selected = -1;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: appBarDefaultTheme
-        (context: context, isReverse: true, title: 'جميع المستخدمين'),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: BlocConsumer<AppCubit, AppStates>(
-            listener: (context, state) {
-              if(state is GetLoadingAllUsersState)
-              {
-                Center(child: loader());
-              }
-            },
-            builder: (context, state) {
-              if (state is GetLoadingAllUsersState) {
-                Center(child: loader());
-              }
+    return ConditionalBuilder(
+      condition:  AppCubit
+          .get(context)
+          .allUsers != null || AppCubit
+          .get(context)
+          .allUsers!
+          .data!
+          .isNotEmpty ,
+      builder: (context) =>  Scaffold(
+        backgroundColor: Colors.white,
+        appBar: appBarDefaultTheme
+          (context: context, isReverse: true, title: 'جميع المستخدمين'),
+        body: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: BlocConsumer<AppCubit, AppStates>(
+              listener: (context, state) {
+                if(state is GetLoadingAllUsersState)
+                {
+                  Center(child: loader());
+                }
+              },
+              builder: (context, state) {
+                if (state is GetLoadingAllUsersState) {
+                  Center(child: loader());
+                }
 
-                return
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 30.h,),
-                      Text('جميع المستخدمين : ', style: GoogleFonts.cairo(
-                          fontWeight: FontWeight.w700, fontSize: 20.sp)),
-                      SizedBox(height: 30.h,),
-                      AppCubit
-                          .get(context)
-                          .allUsers != null || AppCubit
-                          .get(context)
-                          .allUsers!
-                          .data!
-                          .isNotEmpty ?
-                      ListView.separated
-                        (
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemBuilder: (context, index) =>
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10.w),
+                  return
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 30.h,),
+                        Text('جميع المستخدمين : ', style: GoogleFonts.cairo(
+                            fontWeight: FontWeight.w700, fontSize: 20.sp)),
+                        SizedBox(height: 30.h,),
+                        AppCubit
+                            .get(context)
+                            .allUsers != null || AppCubit
+                            .get(context)
+                            .allUsers!
+                            .data!
+                            .isNotEmpty ?
+                        ListView.separated
+                          (
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemBuilder: (context, index) =>
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 10.w),
 
-                                decoration: BoxDecoration(
-                                  color:
-                                  gridColor,
-                                  borderRadius: BorderRadius.circular(16.r),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(height: 10.h,),
+                                  decoration: BoxDecoration(
+                                    color:
+                                    gridColor,
+                                    borderRadius: BorderRadius.circular(16.r),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(height: 10.h,),
 
-                                    Row(
-                                      children: [
+                                      Row(
+                                        children: [
 
-                                        Text(' الاسم : ${AppCubit
+                                          Text(' الاسم : ${AppCubit
+                                              .get(context)
+                                              .allUsers!
+                                              .data![index].firstName} ${AppCubit
+                                              .get(context)
+                                              .allUsers!
+                                              .data![index].lastName}  ',
+                                            style: GoogleFonts.cairo(
+                                                color: primaryColor,
+                                                fontWeight: FontWeight.bold),),
+
+                                          Spacer(),
+                                          BlocConsumer<AppCubit, AppStates>(
+                                            listener: (context, state) {
+
+                                            },
+                                            builder: (context, state) =>
+                                                InkWell(
+                                                    onTap: () {
+                                                      AppCubit.get(context)
+                                                          .deleteUsersFun(
+                                                        userId: AppCubit
+                                                            .get(context)
+                                                            .allUsers!
+                                                            .data![index].id,
+                                                      );
+                                                    },
+                                                    child: const Icon(
+                                                      Icons.delete_forever,
+
+                                                      size: 30,
+                                                      color: Colors.red,)),
+                                          ),
+                                        ],
+                                      ),
+
+                                      SizedBox(height: 20.h,),
+
+                                      Row(children: [
+                                        InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              selected = index;
+                                              click = !click;
+                                            });
+                                          },
+                                          child: Text(
+
+                                              'عرض البيانات',
+                                              style: GoogleFonts.cairo(
+                                                  decoration: TextDecoration
+                                                      .underline,
+                                                  fontSize: 18.sp,
+                                                  color: SecondColor,
+                                                  fontWeight: FontWeight.bold)),
+                                        ),
+                                        const Icon(Icons.arrow_drop_down_outlined,
+                                          color: SecondColor,),
+                                        Text('( ${AppCubit
                                             .get(context)
                                             .allUsers!
-                                            .data![index].firstName} ${AppCubit
-                                            .get(context)
-                                            .allUsers!
-                                            .data![index].lastName}  ',
+                                            .data![index].role} )  ',
                                           style: GoogleFonts.cairo(
                                               color: primaryColor,
                                               fontWeight: FontWeight.bold),),
-
-                                        Spacer(),
-                                        BlocConsumer<AppCubit, AppStates>(
-                                          listener: (context, state) {
-
-                                          },
-                                          builder: (context, state) =>
-                                              InkWell(
-                                                  onTap: () {
-                                                    AppCubit.get(context)
-                                                        .deleteUsersFun(
-                                                      userId: AppCubit
-                                                          .get(context)
-                                                          .allUsers!
-                                                          .data![index].id,
-                                                    );
-                                                  },
-                                                  child: const Icon(
-                                                    Icons.delete_forever,
-
-                                                    size: 30,
-                                                    color: Colors.red,)),
-                                        ),
-                                      ],
-                                    ),
-
-                                    SizedBox(height: 20.h,),
-
-                                    Row(children: [
-                                      InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            selected = index;
-                                            click = !click;
-                                          });
-                                        },
-                                        child: Text(
-
-                                            'عرض البيانات',
-                                            style: GoogleFonts.cairo(
-                                                decoration: TextDecoration
-                                                    .underline,
-                                                fontSize: 18.sp,
-                                                color: SecondColor,
-                                                fontWeight: FontWeight.bold)),
-                                      ),
-                                      const Icon(Icons.arrow_drop_down_outlined,
-                                        color: SecondColor,),
-                                      Text('( ${AppCubit
+                                      ],),
+                                      SizedBox(height: 10.h,),
+                                      click && selected == index
+                                          ? listViewItemsCar(
+                                          context, get: AppCubit
                                           .get(context)
                                           .allUsers!
-                                          .data![index].role} )  ',
-                                        style: GoogleFonts.cairo(
-                                            color: primaryColor,
-                                            fontWeight: FontWeight.bold),),
-                                    ],),
-                                    SizedBox(height: 10.h,),
-                                    click && selected == index
-                                        ? listViewItemsCar(
-                                        context, get: AppCubit
-                                        .get(context)
-                                        .allUsers!
-                                        .data![index])
-                                        : Container(),
+                                          .data![index])
+                                          : Container(),
 
 
-                                    SizedBox(height: 20.h,),
+                                      SizedBox(height: 20.h,),
 
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                          separatorBuilder: (context, index) =>
-                          const Divider(color: fillRectangular),
-                          itemCount: AppCubit
-                              .get(context)
-                              .allUsers!
-                              .data!
-                              .length) :
+                            separatorBuilder: (context, index) =>
+                            const Divider(color: fillRectangular),
+                            itemCount: AppCubit
+                                .get(context)
+                                .allUsers!
+                                .data!
+                                .length) :
 
-                      Center(child: Column(
-                        children: [
+                        Center(child: Column(
+                          children: [
 
-                          Lottie.asset(
-                              'assets/animation/Animation - 1707786695011.json'),
+                            Lottie.asset(
+                                'assets/animation/Animation - 1707786695011.json'),
 
-                          Text(
+                            Text(
 
-                            'لا يوجد مستخدمين',
-                            style: GoogleFonts.cairo(
-                                fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      )),
+                              'لا يوجد مستخدمين',
+                              style: GoogleFonts.cairo(
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        )),
 
-                    ],
-                  );
+                      ],
+                    );
 
-            }
+              }
+            ),
           ),
         ),
+
+
+
+
       ),
 
-
-
-
+      fallback: (context) =>    Center(child: loader()),
     );
   }
 

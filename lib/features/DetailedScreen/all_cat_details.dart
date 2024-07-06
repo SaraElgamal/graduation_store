@@ -94,7 +94,7 @@ class _AllCategoryDetailedScreenState extends State<AllCategoryDetailedScreen> {
     return BlocConsumer<ProductsCubit,ProductStates>(
 
       listener: (context, state) {
-        if(state is DeleteProductsSuccessProduct)
+        if(state is DeleteProductsSuccessProduct || state is DeleteProductsErrorProduct)
         {
           Navigator.pop(context);
         }
@@ -341,6 +341,8 @@ class _AllCategoryDetailedScreenState extends State<AllCategoryDetailedScreen> {
                                                           navigateFinish(context,
                                                               LoginScreen());},),),],),),),);}
                                       else {
+                                        print(   sub.allProducts![widget.indexCat].products![widget.indexProduct].details![_currentImageIndex].file.toString(),
+                                        );
                                         showDialog(
                                           context: context, builder: (context) =>
                                             Dialog(
@@ -393,8 +395,13 @@ class _AllCategoryDetailedScreenState extends State<AllCategoryDetailedScreen> {
 
                                                           toPage: () async
                                                           {
+
                                                             CardCubit.get(context).uploadImage
-                                                              (File(_photoPath.toString()), "https://res.cloudinary.com/hi6vkvnn7/image/upload/v1719836613/cqxwiyl8llhq205ojyth.jpg");
+                                                              (File(_photoPath.toString()),
+                                                                sub.allProducts![widget.indexCat].products![widget.indexProduct].details![_currentImageIndex].file.toString(),
+
+
+                                                            );
                                                 navigateTo(context, FitScreen());
                                                           },),
                                                       ),

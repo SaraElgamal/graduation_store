@@ -158,7 +158,7 @@ class ProductsCubit extends Cubit<ProductStates> {
 
     try {
       Response response = await dio.post(
-        'http://10.0.2.2:4000/details',
+        'https://shopping-gp-2b5338c8c372.herokuapp.com/details',
         data: formData,
         options: Options(
           followRedirects: false,
@@ -174,6 +174,9 @@ class ProductsCubit extends Cubit<ProductStates> {
 
       if (response.statusCode == 201) {
         print('Response: ${response.data}');
+        getAllProductsFun();
+        showToast(text: 'تمت الاضافة', state: ToastStates.success);
+
       } else {
         print('Error: ${response.statusCode}');
       }
@@ -288,13 +291,14 @@ userId: userId,
       emit(DeleteProductsSuccessProduct());
       showToast(text: 'تم الحذف بنجاح', state: ToastStates.success);
 
-
+getAllProductsFun();
     }).catchError((onError)
     {
-      showToast(text: 'عفوا حدث خطأ حاول مرة أخرى', state: ToastStates.error);
+     // showToast(text: 'عفوا حدث خطأ حاول مرة أخرى', state: ToastStates.error);
 
       emit(DeleteProductsErrorProduct());
       log('errrrrror ${onError.toString()}');
+      getAllProductsFun();
 
     });
 

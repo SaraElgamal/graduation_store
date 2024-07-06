@@ -77,7 +77,7 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
 
   Future<void> _pickImage() async {
     final  pickedFile = await _picker.pickImage(source:
-    ImageSource.camera);
+    ImageSource.gallery);
     setState(() {
       if (pickedFile != null) {
         _photoPath = pickedFile.path;

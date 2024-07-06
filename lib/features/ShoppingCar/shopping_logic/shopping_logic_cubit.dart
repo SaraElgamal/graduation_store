@@ -171,37 +171,24 @@ class CardCubit extends Cubit<ShoppingStates> {
   Future<void> uploadImage(File imageFile, String clothUrl) async {
     Dio dio = Dio();
     String apiUrl = 'http://10.0.2.2:4000/products/tryClothes';
-
     FormData formData = FormData.fromMap({
       'image': await MultipartFile.fromFile(imageFile.path,
           filename: imageFile.path.split('/').last),
       'cloth_url': clothUrl,
-    });
-
-    try {
-      Response response = await dio.post(apiUrl, data: formData,
+    });try {Response response = await dio.post(apiUrl, data: formData,
         options: Options(
           followRedirects: false,
           validateStatus: (status) => status != null && status < 500,
           maxRedirects: 0,
           headers: {
-            'Authorization': 'Bearer $token',  // Ensure $token is correctly set
+            'Authorization': 'Bearer $token',
             'Accept': '*/*',
-            'Content-Type': 'multipart/form-data',
-          },
-        ),
-      );
+            'Content-Type': 'multipart/form-data',},),);
       if (response.statusCode == 200) {
         print('Image uploaded successfully');
         imageFinallyUrl = response.data['url'];
-
         emit(SuccessProcessing());
         print('Image URL: $imageFinallyUrl');
-
         print(response.data);
-      } else {
-        print('Image upload failed');
-      }
-    } catch (e) {
-      print('Error: $e');
+      } else {print('Image upload failed');}} catch (e) {print('Error: $e');
     }}}
